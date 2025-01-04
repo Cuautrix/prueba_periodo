@@ -1,0 +1,33 @@
+<nav class="bg-gray-900 text-white p-4">
+  <div class="container mx-auto flex justify-between items-center">
+    <div class="text-xl font-bold">Store Logo</div>
+    <div class="flex items-center space-x-6">
+      <!-- Si el token es nulo -->
+      <div *ngIf="this.token === null" class="flex space-x-4">
+        <a href="#" class="hover:text-emerald-400">Home</a>
+        <a href="#" class="hover:text-emerald-400">Products</a>
+        <a href="#" class="hover:text-emerald-400">About</a>
+        <a (click)="router.navigate(['/login'])" class="hover:text-emerald-400">Iniciar Sesión</a>
+      </div>
+
+      <!-- Si el token no es nulo o indefinido -->
+      <div *ngIf="this.token !== null && this.token !== undefined" class="flex space-x-4">
+        <!-- Enlaces para Administrador -->
+        <div *ngIf="this.user_Data.rol === 'Administrador'" class="flex space-x-4">
+          <a (click)="router.navigate(['/Lista_productos'])" class="hover:text-emerald-400">Productos</a>
+          <a (click)="router.navigate(['/Lista_categorias'])" class="hover:text-emerald-400">Categorías</a>
+        </div>
+
+        <!-- Enlaces para Cliente -->
+        <div *ngIf="this.user_Data.rol === 'Cliente'" class="flex space-x-4">
+          <a href="#" class="hover:text-emerald-400">Home</a>
+          <a href="#" class="hover:text-emerald-400">Products</a>
+          <a href="#" class="hover:text-emerald-400">About</a>
+          <a routerLink='/login' class="hover:text-emerald-400">Carrito</a>
+        </div>
+
+        <a (click)="logOut()" class="hover:text-emerald-400">Cerrar Sesión</a>
+      </div>
+    </div>
+  </div>
+</nav>

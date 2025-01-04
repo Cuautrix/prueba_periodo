@@ -1,0 +1,45 @@
+<app-menu></app-menu>
+<div class="p-6 space-y-6">
+    <!-- Menú superior -->
+
+    <div class="text-left mb-6">
+      <h1 class="text-3xl font-extrabold text-gray-800 uppercase tracking-wide">
+        Lista de Categorias
+      </h1>
+    </div>
+    <!-- Botón de agregar con margen superior -->
+    <div class="flex justify-end">
+      <button
+        routerLink="/Agregar_categoria"
+        class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 shadow-md"
+      >
+        Agregar +
+      </button>
+    </div>
+  
+    <!-- Tabla -->
+    <div class="overflow-x-auto shadow-lg rounded-lg">
+      <table class="min-w-full bg-white rounded-lg shadow-lg overflow-hidden">
+        <!-- Encabezados de la tabla -->
+        <thead>
+          <tr class="bg-[#002D3E] text-white text-left">
+            <th class="px-6 py-3 text-sm font-semibold">ID</th>
+            <th class="px-6 py-3 text-sm font-semibold">Nombre</th>
+            <th class="px-6 py-3 text-sm font-semibold">Correo</th>
+            <th class="px-6 py-3 text-sm font-semibold">Rol</th>
+          </tr>
+        </thead>
+  
+        <!-- Cuerpo de la tabla -->
+        <tbody *ngFor="let item of categories">
+          <tr class="odd:bg-[#E5EEF3] even:bg-[#C3D9D6] hover:bg-[#86D4C3] text-[#002D3E]">
+            <td class="px-6 py-4">{{ item.uid }}</td>
+            <td class="px-6 py-4">{{ item.name }}</td>
+            <td class="px-6 py-4">{{ item.description }}</td>
+            <td class="px-6 py-4">{{ item.image }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  

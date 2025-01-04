@@ -1,0 +1,80 @@
+<div class="min-h-screen bg-teal-50 flex items-center justify-center relative">
+  <!-- Botón de Volver -->
+  <button
+    (click)="onBack()"
+    class="absolute top-4 left-4 bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400 flex items-center"
+  >
+    <!-- Icono de flecha -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+    </svg>
+    Volver
+  </button>
+
+  <!-- Formulario -->
+  <div class="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
+    <h2 class="text-2xl font-bold text-center text-teal-800 mb-6">Iniciar Sesión</h2>
+    <form #LoginForm="ngForm"  (ngSubmit)="login(LoginForm)" class="space-y-4">
+      <!-- Email Field -->
+      <div>
+        <label for="email" class="block text-teal-800 font-medium">Correo Electrónico</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="email"
+          #emailRef="ngModel"
+          required
+          class="w-full mt-2 px-4 py-2 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+        />
+        <div *ngIf="emailRef.invalid && emailRef.touched" class="text-red-500 text-sm mt-1">
+          Ingresa un correo válido.
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div>
+        <label for="password" class="block text-teal-800 font-medium">Contraseña</label>
+        <div class="relative mt-2">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            name="password"
+            [(ngModel)]="password"
+            #passwordRef="ngModel"
+            required
+            minlength="2"
+            class="w-full px-4 py-2 border border-teal-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+          <button
+            type="button"
+            (click)="togglePasswordVisibility()"
+            class="absolute inset-y-0 right-3 flex items-center text-teal-600"
+          >
+            <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7 .042-.287.097-.567.163-.84m16.719 3.24C20.268 16.057 16.478 19 12 19c-1.058 0-2.07-.146-3.025-.412m6.406-2.946A3 3 0 1112 9m0 6a3 3 0 010-6m-6.833 3.975a10.05 10.05 0 01-.287-1.151m15.312 2.176c.042-.287.097-.567.163-.84" />
+            </svg>
+            <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-.042.287-.097.567-.163.84M12 19c-4.478 0-8.268-2.943-9.542-7a12.045 12.045 0 01.163-.84" />
+            </svg>
+          </button>
+        </div>
+        <div *ngIf="passwordRef.invalid && passwordRef.touched" class="text-red-500 text-sm mt-1">
+          La contraseña debe tener al menos 6 caracteres.
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div>
+        <button
+          type="submit"
+          [disabled]="LoginForm.invalid"
+          class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+        >
+          Iniciar Sesión
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
