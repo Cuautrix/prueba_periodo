@@ -24,6 +24,6 @@ exports.auth = function(req,res,next){
         }
     }
 
-    req.usuario =payload;
+    req.user =payload;
     next();
 }

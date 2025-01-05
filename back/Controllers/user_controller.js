@@ -58,19 +58,28 @@ exports.insert_user = async (req, res) => {
 };
 
 
-exports.get_productid = async(req,res)=>{
-   if(req.user){
-         var id = req.params['id'];
-         try{
-             var reg = await Product.findById({_id:id});
-              res.status(200).send({data:reg});
-         }catch{
-             res.status(200).send({data:undefined});
-         }
-     }else{
-         res.status(500).send({message: 'Sin acceso'})
-     }
-}
+exports.get_productid = async (req, res) => {
+    if (req.user) {
+      const id = req.params['id'];
+  
+      try {
+        // Encuentra el producto por ID y popula la categoría asociada
+        const reg = await Product.findById(id).populate('id_Category'); // Cambié a minúsculas en 'category' si es correcto.
+        console.log(reg)
+        if (reg) {
+          return res.status(200).send({ data: reg });
+        } else {
+          return res.status(404).send({ message: 'Producto no encontrado' });
+        }
+      } catch (error) {
+        console.error('Error al obtener el producto:', error);
+        return res.status(500).send({ message: 'Error del servidor' });
+      }
+    } else {
+      return res.status(403).send({ message: 'Sin acceso' });
+    }
+  };
+  
 
 exports.get_products = async(req,res)=>{
 try {
@@ -88,14 +97,16 @@ exports.insert_product = async(req,res)=>{
             if(req.user.role=== 'Administrador' )
             {
               let data = req.body;
-                var img_route = req.files.image.path;
-                var nombre= img_route.split('/');
-               // var nombre= img_ruta.split('\\');
-    
-                var img_name = nombre[2];
-                //insertar en la bd
-                data.slug = data.titulo.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-                data.image = img_name;
+               if (req.files && req.files.image) {
+                                  let img_route = req.files.image.path;
+                                  let img_name = path.basename(img_route); // Obtiene el nombre del archivo
+                                  data.Image = img_name;
+                                  console.log('Nombre de la imagen:', data.Image);
+                              } else {
+                                  res.status(400).send({ message: 'La imagen es requerida' });
+                                  return;
+                              }
+              
                 
                 let newproduct = await Product.create(data);
                 res.status(200).send({
@@ -112,47 +123,58 @@ exports.insert_product = async(req,res)=>{
 }
 
 exports.edit_product = async (req, res) => {
-    if (req.user) {
-        if (req.user.role === 'Administrador') {
-            try {
-                let productId = req.params.id; // Asegúrate de pasar el ID del producto en los parámetros de la URL
-                let data = req.body;
-
-                // Si se envía una nueva imagen
-                if (req.files && req.files.image) {
-                    var img_route = req.files.image.path;
-                    var nombre = img_route.split('/');
-                    // var nombre= img_ruta.split('\\'); // para sistemas Windows
-                    var img_name = nombre[2];
-                    data.image = img_name;
-                }
-
-                // Actualizar el slug solo si se cambia el título
-                if (data.titulo) {
-                    data.slug = data.titulo.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-                }
-
-                // Actualizar el producto en la base de datos
-                let updatedProduct = await Product.findByIdAndUpdate(productId, data, {
-                    new: true, // Devuelve el documento actualizado
-                    runValidators: true, // Ejecuta las validaciones del modelo
-                });
-
-                if (!updatedProduct) {
-                    return res.status(404).send({ message: 'Producto no encontrado' });
-                }
-
-                res.status(200).send({ message: 'Producto actualizado correctamente', product: updatedProduct });
-            } catch (error) {
-                console.error(error);
-                res.status(500).send({ message: 'Error en el servidor', error });
-            }
-        } else {
-            res.status(403).send({ message: 'Sin acceso' });
-        }
-    } else {
-        res.status(403).send({ message: 'Sin acceso' });
-    }
+    if(req.user){
+           if(req.user.role='Administrador'){
+             let id= req.params['id'];
+             let data = req.body;
+          
+             if(req.files){
+               //si hay imagen
+               let img_route = req.files.image.path;
+               let img_name = path.basename(img_route); // Obtiene el nombre del archivo
+               data.Image = img_name;
+               console.log('Nombre de la imagen:', data.Image);
+               let reg = await Product.findByIdAndUpdate({_id:id},{
+                   name : data.name ,
+                   description : data.description ,
+                   price:data.price,
+                   id_Category:data.category,
+                   Image: img_name
+               })
+   
+               fs.stat('./uploads/products/'+reg.Image,function(err){
+                   if(!err){
+                       fs.unlink('./uploads/products/'+reg.Image,(err=>{
+                           if(err)throw err;
+                       }));
+                   }
+               })
+   
+               res.status(200).send({data:reg});
+   
+             }else{
+               // no hay imagen
+               //console.log('no hay imagen')
+               let reg = await Product.findByIdAndUpdate({_id:id},{
+                   name : data.name ,
+                   description : data.description ,
+                   price:data.price,
+                   id_Category:data.category,
+                   
+               })
+               res.status(200).send({data:reg});
+   
+             }     
+   
+            
+   
+   
+           }else{
+               res.status(500).send({message: 'Sin acceso'})
+           }
+       }else{
+           res.status(500).send({message: 'Sin acceso'})
+       }
 };
 
 exports.delete_product = async (req, res) => {
@@ -191,3 +213,39 @@ exports.delete_product = async (req, res) => {
         res.status(403).send({ message: 'Sin acceso' });
     }
 };
+
+
+exports.get_product_image= async (req, res)=>{
+    var img = req.params['img'];
+
+    fs.stat('./uploads/products/'+img,function(err){
+        if(!err){
+            let ruta_img='./uploads/products/'+img;
+            res.status(200).sendFile(path.resolve(ruta_img));
+        }else{
+            let ruta_img='./uploads/default.jpg';
+            res.status(200).sendFile(path.resolve(ruta_img));
+        }
+    })
+}
+
+exports.get_productcategory = async (req, res) => {
+   
+      const id = req.params['id'];
+  
+      try {
+        // Encuentra el producto por ID y popula la categoría asociada
+        const reg = await Product.find({id_Category:id}).populate('id_Category'); // Cambié a minúsculas en 'category' si es correcto.
+        console.log(reg)
+        if (reg) {
+          return res.status(200).send({ data: reg });
+        } else {
+          return res.status(404).send({ message: 'Producto no encontrado' });
+        }
+      } catch (error) {
+        console.error('Error al obtener el producto:', error);
+        return res.status(500).send({ message: 'Error del servidor' });
+      }
+  
+  };
+  

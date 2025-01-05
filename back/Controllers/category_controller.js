@@ -1,6 +1,7 @@
 const Category = require('../Models/Category'); // Asegúrate de tener el modelo correcto
 const fs = require('fs');
 const path = require('path');
+const Product = require('../Models/Product');
 
 // Obtener una categoría por su ID
 exports.get_category_by_id = async (req, res) => {
@@ -41,18 +42,25 @@ exports.insert_category = async (req, res) => {
             try {
                 let data = req.body;
 
-                // Manejar la imagen si se sube
+                // Verificar si el archivo se envió
                 if (req.files && req.files.image) {
                     let img_route = req.files.image.path;
-                    let nombre = img_route.split('/');
-                    let img_name = nombre[2];
-                    data.image = img_name;
+                    let img_name = path.basename(img_route); // Obtiene el nombre del archivo
+                    data.Image = img_name;
+                    console.log('Nombre de la imagen:', data.Image);
+                } else {
+                    res.status(400).send({ message: 'La imagen es requerida' });
+                    return;
                 }
 
                 // Crear un slug a partir del nombre
-                data.slug = data.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+                if (data.name) {
+                    data.slug = data.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+                }
 
+                // Crear la nueva categoría
                 let newCategory = await Category.create(data);
+
                 res.status(201).send({ message: 'Categoría creada exitosamente', category: newCategory });
             } catch (error) {
                 console.error(error);
@@ -67,47 +75,55 @@ exports.insert_category = async (req, res) => {
 };
 
 // Editar una categoría
-exports.edit_category = async (req, res) => {
-    if (req.user) {
-        if (req.user.role === 'Administrador') {
-            try {
-                let categoryId = req.params.id;
-                let data = req.body;
+exports.edit_category = async (req, res)=>{
+    if(req.user){
+        if(req.user.role='Administrador'){
+          let id= req.params['id'];
+          let data = req.body;
+       
+          if(req.files){
+            //si hay imagen
+            let img_route = req.files.image.path;
+            let img_name = path.basename(img_route); // Obtiene el nombre del archivo
+            data.Image = img_name;
+            console.log('Nombre de la imagen:', data.Image);
+            let reg = await Category.findByIdAndUpdate({_id:id},{
+                name : data.name ,
+                description : data.description ,
+                Image: img_name
+            })
 
-                // Si se envía una nueva imagen
-                if (req.files && req.files.image) {
-                    let img_route = req.files.image.path;
-                    let nombre = img_route.split('/');
-                    let img_name = nombre[2];
-                    data.image = img_name;
+            fs.stat('./uploads/category/'+reg.Image,function(err){
+                if(!err){
+                    fs.unlink('./uploads/category/'+reg.Image,(err=>{
+                        if(err)throw err;
+                    }));
                 }
+            })
 
-                // Actualizar el slug si se cambia el nombre
-                if (data.name) {
-                    data.slug = data.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-                }
+            res.status(200).send({data:reg});
 
-                let updatedCategory = await Category.findByIdAndUpdate(categoryId, data, {
-                    new: true,
-                    runValidators: true,
-                });
+          }else{
+            // no hay imagen
+            //console.log('no hay imagen')
+            let reg = await Category.findByIdAndUpdate({_id:id},{
+                name : data.name ,
+                description : data.description ,
+            })
+            res.status(200).send({data:reg});
 
-                if (!updatedCategory) {
-                    return res.status(404).send({ message: 'Categoría no encontrada' });
-                }
+          }     
 
-                res.status(200).send({ message: 'Categoría actualizada correctamente', category: updatedCategory });
-            } catch (error) {
-                console.error(error);
-                res.status(500).send({ message: 'Error en el servidor', error });
-            }
-        } else {
-            res.status(403).send({ message: 'Sin acceso' });
+         
+
+
+        }else{
+            res.status(500).send({message: 'Sin acceso'})
         }
-    } else {
-        res.status(403).send({ message: 'Sin acceso' });
+    }else{
+        res.status(500).send({message: 'Sin acceso'})
     }
-};
+}
 
 // Eliminar una categoría
 exports.delete_category = async (req, res) => {
@@ -124,7 +140,7 @@ exports.delete_category = async (req, res) => {
 
                 // Ruta completa de la imagen a eliminar
                 if (category.image) {
-                    let imagePath = path.resolve('./uploads/' + category.image);
+                    let imagePath = path.resolve('./uploads/categories' + category.image);
                     if (fs.existsSync(imagePath)) {
                         fs.unlinkSync(imagePath);
                     }
@@ -144,3 +160,18 @@ exports.delete_category = async (req, res) => {
         res.status(403).send({ message: 'Sin acceso' });
     }
 };
+
+
+exports.get_category_image= async (req, res)=>{
+    var img = req.params['img'];
+
+    fs.stat('./uploads/categories/'+img,function(err){
+        if(!err){
+            let ruta_img='./uploads/categories/'+img;
+            res.status(200).sendFile(path.resolve(ruta_img));
+        }else{
+            let ruta_img='./uploads/default.jpg';
+            res.status(200).sendFile(path.resolve(ruta_img));
+        }
+    })
+}

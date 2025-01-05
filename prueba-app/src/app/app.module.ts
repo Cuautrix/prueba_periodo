@@ -19,7 +19,7 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
     AppRoutingModule,
    
     LoginModule,
- 
+    
 
    
 

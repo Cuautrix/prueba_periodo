@@ -23,23 +23,53 @@
         <!-- Encabezados de la tabla -->
         <thead>
           <tr class="bg-[#002D3E] text-white text-left">
-            <th class="px-6 py-3 text-sm font-semibold">ID</th>
+            <th class="px-6 py-3 text-sm font-semibold">Imagen</th>
             <th class="px-6 py-3 text-sm font-semibold">Nombre</th>
-            <th class="px-6 py-3 text-sm font-semibold">Correo</th>
-            <th class="px-6 py-3 text-sm font-semibold">Rol</th>
+            <th class="px-6 py-3 text-sm font-semibold">Descripcion</th>
+            <th class="px-6 py-3 text-sm font-semibold">Opciones</th>
+
           </tr>
         </thead>
   
         <!-- Cuerpo de la tabla -->
         <tbody *ngFor="let item of categories">
           <tr class="odd:bg-[#E5EEF3] even:bg-[#C3D9D6] hover:bg-[#86D4C3] text-[#002D3E]">
-            <td class="px-6 py-4">{{ item.uid }}</td>
+            <td class="px-6 py-4 text-center">
+              <img 
+                class="block mx-auto object-cover rounded-md"
+                style="width: 70px; height: 70px;"
+                [src]="url + 'get_category_image/' + item.Image" 
+                alt="Product image">
+            </td>
             <td class="px-6 py-4">{{ item.name }}</td>
             <td class="px-6 py-4">{{ item.description }}</td>
-            <td class="px-6 py-4">{{ item.image }}</td>
+            
+            
+           <!-- Botones de acción -->
+          <td class="px-6 py-4 text-center">
+            <div class="flex flex-col sm:flex-row sm:justify-center sm:items-center gap-2">
+              <button 
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto"
+                [routerLink]="['/Editar_categoria', item._id]">
+                Editar
+              </button>
+              <button 
+                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto"
+                (click)="deleteCategory(item._id)">
+                Eliminar
+              </button>
+            </div>
+          </td>
+
           </tr>
         </tbody>
+
+       
       </table>
+      
+    </div>
+    <div *ngIf="this.categories.length === 0">
+      <h1>No hay ninguna categoria registrada</h1>
     </div>
   </div>
   

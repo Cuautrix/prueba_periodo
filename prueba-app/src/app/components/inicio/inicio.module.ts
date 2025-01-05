@@ -14,6 +14,7 @@ import { MenuModule } from '../menu/menu.module';
 @NgModule({
   declarations: [
     InicioComponent
+    
   ]
   ,
   imports: [

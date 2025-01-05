@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import iziToast from 'izitoast';
+import { GLOBAL } from 'src/app/servicios/GLOBAL';
 import { ProductService } from 'src/app/servicios/product.service';
 
 @Component({
@@ -8,10 +10,15 @@ import { ProductService } from 'src/app/servicios/product.service';
 })
 export class ListProductsComponent implements OnInit {
   public products: Array<any> = [];
-
+  public url;
+  public token;
   constructor(
     private productService:ProductService
-  ) { }
+  ) { 
+    this.url = GLOBAL.url;
+    this.token=localStorage.getItem('token');
+
+  }
 
   ngOnInit(): void {
     this.get_products();
@@ -20,7 +27,31 @@ export class ListProductsComponent implements OnInit {
   get_products(){
     this.productService.get_products().subscribe(
       res=>{
-          res.data=this.products; 
+          this.products=res.data; 
+          console.log(this.products)
+      }
+    )
+  }
+
+  editProduct(id:any){
+
+  }
+
+  deleteProduct(id:any){
+    this.productService.delete_product(id,this.token).subscribe(
+      res=>{
+        iziToast.success({
+          title: 'Éxito',
+          message: 'Categoría eliminada exitosamente',
+          position: 'topRight'
+        });
+        this.get_products();
+      }, err=>{
+        iziToast.success({
+          title: 'Error',
+          message: 'Fallo al eliminar categoria',
+          position: 'topRight'
+        });
       }
     )
   }

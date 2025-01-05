@@ -9,6 +9,8 @@ import { Route, Router } from '@angular/router';
 export class MenuComponent implements OnInit {
   public token:any;
   public user_Data:any={};
+  menuOpen = false; // Estado del menú
+
   constructor( public router:Router) { }
 
   ngOnInit(): void {
@@ -20,5 +22,9 @@ export class MenuComponent implements OnInit {
     localStorage.clear();
     this.router.navigate(['/inicio']);
     this.token= localStorage.getItem('token');
+  }
+
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen; // Cambia el estado del menú
   }
 }
