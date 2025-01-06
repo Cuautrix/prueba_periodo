@@ -1,140 +1,194 @@
 <app-menu></app-menu>
 
-<div class="bg-gray-900 text-white py-20">
+
+  <div class="bg-gray-900 text-white py-20">
     <div class="container mx-auto text-center">
       <h1 class="text-4xl font-bold mb-6">Bienvenido a nuestra tienda</h1>
       <p class="text-lg mb-8 max-w-2xl mx-auto">
         Descubre nuestra increíble colección de productos con las mejores ofertas
       </p>
-      <button class="bg-emerald-500 text-white px-8 py-3 rounded-lg hover:bg-emerald-600">
-        Comprar ahora
+      <button
+        *ngIf="user_Data != undefined"
+        class="bg-emerald-500 text-white px-8 py-3 rounded-lg hover:bg-emerald-600"
+        (click)="toggleCart()"
+      >
+        Ver Carrito
       </button>
     </div>
-</div>
-
-<div class="container mx-auto py-16">
-  <h2 class="text-2xl font-bold mb-8 text-center">Categorías destacadas</h2>
-  <div class="relative mt-10 mb-10">
-    <!-- Botón izquierdo -->
-    <button 
-      class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-teal-600 text-white p-3 rounded-full shadow-md hover:bg-teal-700 focus:outline-none z-20" 
-      (click)="scrollCarousel('left')">
-      &#10094;
+  </div>
+  
+<ng-container  *ngIf="user_Data != undefined">
+  
+  
+  <!-- Botón persistente para abrir/cerrar el carrito -->
+  <div class="cart-trigger" (click)="toggleCart()">🛒
+    <span class="cart-count" *ngIf="getTotalProducts() > 0">{{ getTotalProducts() }}</span>
+  </div>
+  
+  
+  <!-- Carrito deslizable -->
+  <div [class.open]="isCartOpen" class="slide-cart">
+    <div class="cart-header">
+      <h2 class="text-xl font-bold">Tu Carrito </h2>
+      <h2 class="text-xl font-bold" *ngIf="this.carrito.length===0">esta vacio</h2>
+      <button class="close-btn" (click)="toggleCart()">X</button>
+    </div>
+    <div class="cart-body">
+      <div class="cart-item" *ngFor="let producto of carrito">
+        <div class="cart-item-info">
+          <img
+            [src]="url + 'get_product_image/' + producto.Image"
+            alt="Product image"
+            class="product-image"
+          />
+          <div class="cart-item-details">
+            <p class="product-name">{{ producto.name }}</p>
+            <p class="product-price">{{ producto.price | currency }}</p>
+            <p class="product-quantity">Cantidad: {{ producto.amount }}</p>
+          </div>
+        </div>
+        <button class="remove-btn" (click)="removeFromCart(producto)">Eliminar</button>
+      </div>
+    </div>
+      <!-- Subtotal Section -->
+      <div class="cart-footer" *ngIf="carrito.length > 0">
+        <div class="subtotal flex justify-between items-center border-b border-gray-300 pb-4">
+          <p class="text-lg font-semibold">Subtotal:</p>
+          <p class="text-lg font-semibold">{{ calcularSubtotal() | currency }}</p>
+        </div>
+       
+      </div>
+      <button
+      class="checkout-btn w-full bg-green-600 hover:bg-green-700 text-white text-lg font-semibold py-3 mt-4 rounded"
+    >
+      Proceder al pago
     </button>
-
-    <!-- Carrusel -->
-    <div 
-  #carousel 
-  class="flex gap-8 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide py-5">
-  <div
-    *ngFor="let item of categories"
-    class="relative h-80 w-96 flex-shrink-0 snap-center rounded-lg flex items-center justify-center text-white text-2xl font-semibold cursor-pointer overflow-visible shadow-lg hover:scale-105 transition-transform duration-300"
-    [style.backgroundImage]="'url(' + url + 'get_category_image/' + item.Image + ')'"
-    [style.backgroundSize]="'cover'"
-    [style.backgroundPosition]="'center'"
-    (click)="scrollToProducts(item._id)"
-  >
+  </div>
+</ng-container>
+  <div class="container mx-auto py-16">
+    <h2 class="text-2xl font-bold mb-8 text-center">Categorías destacadas</h2>
+    <div class="relative mt-10 mb-10">
+      <!-- Botón izquierdo -->
+      <button 
+        class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-teal-600 text-white p-3 rounded-full shadow-md hover:bg-teal-700 focus:outline-none z-20" 
+        (click)="scrollCarousel('left')">
+        &#10094;
+      </button>
+  
+      <!-- Carrusel -->
+      <div 
+    #carousel 
+    class="flex gap-8 overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide py-5">
     <div
-      class="absolute inset-0"
-      [style.backgroundColor]="'rgba(0, 0, 0, 0.35)'">
-    </div>
-    <span class="z-10">{{ item.name }}</span>
-  </div>
-</div>
-
-</div>
-
-
-
-
-
-
-  <div class="container mx-auto ">
-    <h2 class="text-2xl font-bold mb-8 text-center">Nuestros Productos</h2>
-    <ng-container *ngIf="this.products.length === 0">
-      <h1 class="text-4xl font-bold mb-8 text-center">No hay productos con esa categoria</h1>
-    </ng-container>
-    <ng-container class="flex justify-center items-center h-screen" *ngIf="load_Data===true">
-        <div class="loader justify-center items-center"></div>
-    </ng-container>
-    <div  *ngIf="load_Data===false" id="products-section" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-4">
+      *ngFor="let item of categories"
+      class="relative h-80 w-96 flex-shrink-0 snap-center rounded-lg flex items-center justify-center text-white text-2xl font-semibold cursor-pointer overflow-visible shadow-lg hover:scale-105 transition-transform duration-300"
+      [style.backgroundImage]="'url(' + url + 'get_category_image/' + item.Image + ')'"
+      [style.backgroundSize]="'cover'"
+      [style.backgroundPosition]="'center'"
+      (click)="scrollToProducts(item._id)"
+    >
       <div
-        *ngFor="let item of products"
-        class="bg-white rounded-xl shadow-md p-4 flex flex-col transition-transform duration-300 transform hover:scale-105 hover:shadow-lg"
-      >
-        <!-- Contenedor de la imagen -->
+        class="absolute inset-0"
+        [style.backgroundColor]="'rgba(0, 0, 0, 0.35)'">
+      </div>
+      <span class="z-10">{{ item.name }}</span>
+    </div>
+  </div>
+  
+  </div>
+  
+  
+  
+  
+  
+  
+    <div class="container mx-auto ">
+      <h2 class="text-2xl font-bold mb-8 text-center">Nuestros Productos</h2>
+      <ng-container *ngIf="this.products.length === 0">
+        <h1 class="text-4xl font-bold mb-8 text-center">No hay productos con esa categoria</h1>
+      </ng-container>
+      <ng-container class="flex justify-center items-center h-screen" *ngIf="load_Data===true">
+          <div class="loader justify-center items-center"></div>
+      </ng-container>
+      <div  *ngIf="load_Data===false" id="products-section" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-4">
         <div
-          class="relative bg-gray-200 rounded-xl h-48 bg-cover bg-center"
-          [style.backgroundImage]="'url(' + url + 'get_product_image/' + item.Image + ')'"
+          *ngFor="let item of products"
+          class="bg-white rounded-xl shadow-md p-4 flex flex-col transition-transform duration-300 transform hover:scale-105 hover:shadow-lg"
         >
-          <!-- Ícono de favorito -->
-          <button
-            class="absolute top-3 right-3 bg-white text-gray-700 p-2 rounded-full shadow hover:text-red-500"
+          <!-- Contenedor de la imagen -->
+          <div
+            class="relative bg-gray-200 rounded-xl h-48 bg-cover bg-center"
+            [style.backgroundImage]="'url(' + url + 'get_product_image/' + item.Image + ')'"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            <!-- Ícono de favorito -->
+            <button
+              class="absolute top-3 right-3 bg-white text-gray-700 p-2 rounded-full shadow hover:text-red-500"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5.121 20.364a3 3 0 0 1-2.121-3.535l1.516-4.907a1 1 0 0 0-.874-1.316L2.172 9.8c-.913-.228-1.282-1.367-.63-2.05l4.066-3.972a1 1 0 0 1 1.317-.153l4.826 2.646a1 1 0 0 0 1.082 0l4.826-2.646a1 1 0 0 1 1.317.153l4.066 3.972c.652.683.283 1.822-.63 2.05l-1.521.377a1 1 0 0 0-.874 1.316l1.516 4.907a3 3 0 0 1-2.121 3.535l-4.26 2.043a1 1 0 0 0-.574.894v4.112a1 1 0 0 1-.574.894l-4.26-2.043z"
-              />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5.121 20.364a3 3 0 0 1-2.121-3.535l1.516-4.907a1 1 0 0 0-.874-1.316L2.172 9.8c-.913-.228-1.282-1.367-.63-2.05l4.066-3.972a1 1 0 0 1 1.317-.153l4.826 2.646a1 1 0 0 0 1.082 0l4.826-2.646a1 1 0 0 1 1.317.153l4.066 3.972c.652.683.283 1.822-.63 2.05l-1.521.377a1 1 0 0 0-.874 1.316l1.516 4.907a3 3 0 0 1-2.121 3.535l-4.26 2.043a1 1 0 0 0-.574.894v4.112a1 1 0 0 1-.574.894l-4.26-2.043z"
+                />
+              </svg>
+            </button>
+          </div>
+      
+          <!-- Contenido de la tarjeta -->
+          <div class="mt-4 text-center flex-grow">
+            <h3 class="font-semibold text-lg text-gray-800">{{item.name}}</h3>
+            <p class="text-sm text-gray-500 mt-1">{{item.description}}</p>
+          </div>
+      
+          <!-- Precio y botón -->
+          <div class="flex justify-between items-center mt-4">
+            <span class="text-lg font-bold text-gray-800">${{item.price}} MX</span>
+            <button
+              class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600"
+              (click)="add_to_cart(item)"
+            >
+              Agregar al carrito
+            </button>
+          </div>
         </div>
-    
-        <!-- Contenido de la tarjeta -->
-        <div class="mt-4 text-center flex-grow">
-          <h3 class="font-semibold text-lg text-gray-800">{{item.name}}</h3>
-          <p class="text-sm text-gray-500 mt-1">{{item.description}}</p>
-        </div>
-    
-        <!-- Precio y botón -->
-        <div class="flex justify-between items-center mt-4">
-          <span class="text-lg font-bold text-gray-800">${{item.price}} MX</span>
-          <button
-            class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600"
-          >
-            Agregar al carrito
-          </button>
+  
+      
+      </div>
+      
+    </div>
+  
+    <div class="bg-gray-100 py-16">
+      <div class="container mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div class="p-6">
+            <div class="w-16 h-16 bg-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center text-white">
+              <span class="text-2xl">🚚</span>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Envios gratis</h3>
+            <p class="text-gray-600">En ordenes arriba de $100</p>
+          </div>
+          <div class="p-6">
+            <div class="w-16 h-16 bg-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center text-white">
+              <span class="text-2xl">⭐</span>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">La mejor calidad</h3>
+            <p class="text-gray-600">100% garantizado</p>
+          </div>
+          <div class="p-6">
+            <div class="w-16 h-16 bg-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center text-white">
+              <span class="text-2xl">💬</span>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Soporte 24/7 </h3>
+            <p class="text-gray-600">Soporte dedicado</p>
+          </div>
         </div>
       </div>
-
-    
     </div>
-    
-  </div>
-
-  <div class="bg-gray-100 py-16">
-    <div class="container mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-        <div class="p-6">
-          <div class="w-16 h-16 bg-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center text-white">
-            <span class="text-2xl">🚚</span>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Envios gratis</h3>
-          <p class="text-gray-600">En ordenes arriba de $100</p>
-        </div>
-        <div class="p-6">
-          <div class="w-16 h-16 bg-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center text-white">
-            <span class="text-2xl">⭐</span>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">La mejor calidad</h3>
-          <p class="text-gray-600">100% garantizado</p>
-        </div>
-        <div class="p-6">
-          <div class="w-16 h-16 bg-emerald-500 rounded-full mx-auto mb-4 flex items-center justify-center text-white">
-            <span class="text-2xl">💬</span>
-          </div>
-          <h3 class="text-xl font-semibold mb-2">Soporte 24/7 </h3>
-          <p class="text-gray-600">Soporte dedicado</p>
-        </div>
-      </div>
-    </div>
-  </div>
-`
+  

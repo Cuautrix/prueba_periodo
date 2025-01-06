@@ -15,15 +15,25 @@ export class LoginComponent {
   showPassword: boolean = false;
   public load=false;
   public logged_user: any ={};
-
+  public token;
   constructor(
     private location: Location,
     private adminservice:AdminService,
     private router:Router,
-  ) {} 
+  ) {
+
+    this.token = this.adminservice.getToken();
+  } 
 
 
-
+  ngOnInit(): void {
+    console.log(this.token);
+    if(this.token){
+      this.router.navigate(['/']);
+    }else{
+      //mantener en el componente
+    }
+  }
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;

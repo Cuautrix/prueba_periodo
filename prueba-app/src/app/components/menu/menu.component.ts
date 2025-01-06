@@ -20,7 +20,7 @@ export class MenuComponent implements OnInit {
 
   logOut(){
     localStorage.clear();
-    this.router.navigate(['/inicio']);
+    this.router.navigate(['/login']);
     this.token= localStorage.getItem('token');
   }
 
